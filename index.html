@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>theFORGE Console — Live Demo</title>
+<style>
+:root{--water:#1B5582;--water-d:#143F61;--fire:#E88A1F;--fire-d:#C5740F;--steel:#5B6770;--soil:#C4A574;--cream:#F7F5F1;--ink:#2C343A;--line:#e4ddd0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Calibri,Arial,"Helvetica Neue",sans-serif;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+header{background:#3C4A52;color:#fff;position:sticky;top:0;z-index:20}
+.hd{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{background:var(--cream);padding:4px 10px;border-radius:8px;border-top:3px solid var(--fire);font-weight:800;letter-spacing:-.02em;font-size:18px}
+.logo .t{color:var(--fire)}.logo .f{color:var(--water)}
+nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:60px;z-index:19}
+.tabs{display:flex;gap:2px;overflow-x:auto}
+.tab{font-weight:700;font-size:14px;padding:13px 16px;cursor:pointer;border:0;background:none;color:var(--steel);border-bottom:3px solid transparent;white-space:nowrap}
+.tab.on{color:var(--water);border-bottom-color:var(--fire)}
+main{padding:24px 0 70px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 22px rgba(27,85,130,.08);padding:18px;margin-bottom:14px}
+.eyebrow{color:var(--fire);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:12px}
+h1{color:var(--water);font-size:30px;margin:4px 0}h2{margin:0}
+.scripture{color:var(--water);font-style:italic;font-family:Georgia,serif;font-size:15px;margin:6px 0 4px}
+.rail{display:flex;gap:6px;overflow-x:auto}
+.stg{flex:1;min-width:96px;border-radius:8px;padding:8px 10px;text-align:center}
+.stg .n{font-size:11px;opacity:.85}.stg .k{font-weight:800;font-size:13px}
+.grid2{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:820px){.grid2{grid-template-columns:1fr 1fr}}
+.bar{background:var(--line);border-radius:999px;height:10px;overflow:hidden}
+.bar>span{display:block;height:100%;background:var(--water)}
+.ring{flex:1;min-width:120px;color:#fff;border-radius:10px;padding:12px 14px}
+.pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;background:#eef2f5;color:var(--water-d);margin:2px 4px 2px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--steel);font-size:12px;text-transform:uppercase;letter-spacing:.06em;padding:8px;border-bottom:2px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line)}
+.tl{border-left:2px solid var(--line);padding-left:16px}
+.tl .ev{position:relative;margin-bottom:16px}
+.tl .dot{position:absolute;left:-23px;top:4px;width:12px;height:12px;border-radius:999px}
+.banner{background:#fff7ec;border:1px solid var(--soil);border-left:5px solid var(--fire);border-radius:10px;padding:10px 14px;margin:14px 0;font-size:13px}
+.muted{color:var(--steel);font-size:13px}
+.load{padding:60px 0;text-align:center;color:var(--steel)}
+</style>
+</head>
+<body>
+<header><div class="wrap hd">
+  <div class="logo"><span class="t">the</span><span class="f">FORGE</span> <span style="color:#aab7bf;font-size:12px;font-weight:600">Console</span></div>
+  <div id="who" style="font-size:12px;color:#aab7bf"></div>
+</div></header>
+<nav><div class="wrap tabs" id="tabs"></div></nav>
+<main><div class="wrap" id="main"><div class="load">Loading your journey…</div></div></main>
+<script>
+var B='https://cfihcgonknvkdvfvgtsf.supabase.co/rest/v1/';
+var K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNmaWhjZ29ua252a2R2ZnZndHNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2Mjg5MDAsImV4cCI6MjA5NjIwNDkwMH0.CCAoE8Fq4k8ujpUl29fwxZd5UtJpahASeCTTEi92w6I';
+var DEMO='de300000-0000-4000-8000-000000000001';
+function api(p){return fetch(B+p,{headers:{apikey:K,Authorization:'Bearer '+K}}).then(function(r){return r.json();});}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var D={}, TABS=[['walk','The Walk'],['journey','Journey'],['assess','Assessments'],['os','Operating System']], cur='walk';
+var RINGS=[['WHO','#143F61','Christ at the center'],['WHY','#1B5582','Your calling'],['HOW','#5B6770','The redemptive way you build'],['WHAT','#C4A574','What you have built']];
+
+Promise.all([
+  api('con_stages?order=n.asc'),
+  api('con_journey?founder_id=eq.'+DEMO),
+  api('con_profiles?id=eq.'+DEMO),
+  api('con_assessments?founder_id=eq.'+DEMO+'&order=taken_at.desc'),
+  api('con_narrative?founder_id=eq.'+DEMO+'&order=occurred_at.desc'),
+  api('con_scorecard?founder_id=eq.'+DEMO),
+  api('con_rocks?founder_id=eq.'+DEMO),
+  api('con_issues?founder_id=eq.'+DEMO),
+  api('con_tasks?founder_id=eq.'+DEMO),
+  api('con_rule_of_life?founder_id=eq.'+DEMO)
+]).then(function(r){
+  D={stages:r[0],journey:(r[1]||[])[0]||{},profile:(r[2]||[])[0]||{},bwa:(r[3]||[]).find(function(a){return a.kind==='bwa_deep'||a.kind==='bwa_short';}),
+     narrative:r[4]||[],scorecard:r[5]||[],rocks:r[6]||[],issues:r[7]||[],tasks:r[8]||[],rol:(r[9]||[])[0]||{}};
+  document.getElementById('who').textContent=D.profile.full_name||'';
+  drawTabs();go('walk');
+}).catch(function(e){document.getElementById('main').innerHTML='<div class="load">Could not reach the data. ('+esc(e.message)+')</div>';});
+
+function drawTabs(){var t=document.getElementById('tabs');t.innerHTML='';TABS.forEach(function(x){var b=document.createElement('button');b.className='tab'+(cur===x[0]?' on':'');b.textContent=x[1];b.onclick=function(){go(x[0]);};t.appendChild(b);});}
+function go(tab){cur=tab;drawTabs();({walk:vWalk,journey:vJourney,assess:vAssess,os:vOs})[tab]();}
+
+function rail(){var c=D.journey.current_stage||1;return '<div class="rail">'+D.stages.map(function(s){var done=s.n<c,act=s.n===c;var bg=act?'var(--fire)':done?'var(--water)':'#e4ddd0';var fg=act||done?'#fff':'var(--steel)';return '<div class="stg" title="'+esc(s.key)+' — '+esc(s.name)+'" style="background:'+bg+';color:'+fg+'"><div class="n">'+s.n+'</div><div class="k">'+esc(s.key)+'</div></div>';}).join('')+'</div>';}
+
+function vWalk(){var j=D.journey,c=j.current_stage||1,st=D.stages[c-1]||{};var m=document.getElementById('main');
+m.innerHTML='<div class="banner">A sample founder journey — <b>'+esc(D.profile.full_name||'a founder')+'</b> — showing the platform every theFORGE founder will walk.</div>'
++'<div class="eyebrow">The Forge Walk</div><h1>Welcome back</h1><div class="scripture">“He who began a good work in you will carry it on to completion.” — Philippians 1:6</div>'
++'<div class="card">'+rail()+'</div>'
++'<div class="grid2">'
++'<div class="card" style="border-left:6px solid var(--fire)"><div class="eyebrow">Where you are</div><h2 style="color:var(--water-d);font-size:24px;margin:6px 0">'+esc(st.key)+' — '+esc(st.name)+'</h2>'
++'<div class="bar"><span style="width:'+(j.stage_pct||0)+'%"></span></div><p class="muted">'+(j.stage_pct||0)+'% through this stage · Type: '+esc(j.founder_type||'—')+'</p>'
++'<p><b style="color:var(--water)">Consulting focus:</b> '+esc(st.consulting)+'</p><p><b style="color:var(--water)">Formation practice:</b> '+esc(st.formation)+'</p></div>'
++'<div class="card"><div class="eyebrow">Eternal Golden Circle (EGC)</div><div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0">'
++RINGS.map(function(x){return '<div class="ring" style="background:'+x[1]+'"><div style="font-weight:800;letter-spacing:.06em">'+x[0]+'</div><div style="font-size:12px;opacity:.9">'+x[2]+'</div></div>';}).join('')+'</div>'
++'<p style="font-size:14px"><b style="color:var(--water)">Calling:</b> '+esc(j.calling_statement||'—')+'</p>'
++'<p style="font-size:14px"><b style="color:var(--water)">Why:</b> '+esc(j.why_statement||'—')+'</p></div>'
++'</div>'
++'<div class="card" style="display:flex;gap:28px;flex-wrap:wrap"><div><div class="eyebrow">Engagement tier</div><div style="font-size:18px;font-weight:700;color:var(--water)">'+esc(j.tier_engagement||'—')+'</div></div><div><div class="eyebrow">Recommended next</div><div style="font-size:18px;font-weight:700;color:var(--fire-d)">'+esc(j.tier_recommended||'—')+'</div></div></div>';}
+
+function vJourney(){var m=document.getElementById('main');var col={who:'#143F61',why:'#1B5582',how:'#5B6770',what:'#C4A574'};
+m.innerHTML='<div class="eyebrow">Your Journey</div><h1>Look how far you’ve come</h1><div class="card"><div class="tl">'
++D.narrative.map(function(e){var d=new Date(e.occurred_at).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});return '<div class="ev"><span class="dot" style="background:'+(col[e.ring]||'var(--soil)')+'"></span><div class="muted">'+d+(e.ring?' · '+e.ring.toUpperCase():'')+'</div><div style="font-weight:700;color:var(--water-d)">'+esc(e.title)+'</div><div style="font-size:14px">'+esc(e.body||'')+'</div></div>';}).join('')
++'</div></div>';}
+
+function vAssess(){var b=D.bwa,m=document.getElementById('main');
+var radar='';if(b&&b.scores){var keys=Object.keys(b.scores),sz=280,c=sz/2,r=c-34,max=5;
+function pt(i,v){var a=Math.PI*2*i/keys.length-Math.PI/2,rr=v/max*r;return [c+rr*Math.cos(a),c+rr*Math.sin(a)];}
+var poly=keys.map(function(k,i){return pt(i,b.scores[k]).join(',');}).join(' ');var ring=keys.map(function(_,i){return pt(i,max).join(',');}).join(' ');
+var mid=keys.map(function(_,i){return pt(i,max*0.66).join(',');}).join(' ');
+radar='<svg viewBox="0 0 '+sz+' '+sz+'" width="100%" style="max-width:340px"><polygon points="'+ring+'" fill="#f7f5f1" stroke="#e4ddd0"/><polygon points="'+mid+'" fill="none" stroke="#eee3cf"/><polygon points="'+poly+'" fill="rgba(27,85,130,.25)" stroke="var(--water)" stroke-width="2"/>'
++keys.map(function(k,i){var p=pt(i,max+0.5);return '<text x="'+p[0]+'" y="'+p[1]+'" font-size="9" fill="#5B6770" text-anchor="middle">'+esc(k)+'</text>';}).join('')+'</svg>';}
+m.innerHTML='<div class="eyebrow">Assessments</div><h1>Honest inventory</h1><p class="muted">BWA is two-tier — a short 6-domain read at Discovery, then this deep 10-domain diagnosis at the SEE stage. The full suite (7F, Gifts, Strengths, Working Genius, learning style) arrives in Phase 2.</p>'
++'<div class="card"><div class="grid2"><div>'+(radar||'<p class="muted">No BWA yet.</p>')+'</div>'
++'<div><h2 style="color:var(--water-d)">Deep BWA</h2>'+(b?('<p><b style="color:var(--fire-d)">Binding constraint:</b> '+esc(b.binding_constraint||'—')+'</p><p class="muted">'+esc(b.summary||'')+'</p><table><tr><th>Domain</th><th>Score</th></tr>'+Object.keys(b.scores||{}).map(function(k){return '<tr><td>'+esc(k)+'</td><td><b>'+b.scores[k]+'</b> / 5</td></tr>';}).join('')+'</table>'):'')+'</div></div></div>';}
+
+function vOs(){var m=document.getElementById('main');function sec(t,rows,fn){return '<div class="card"><h2 style="color:var(--water-d);font-size:18px">'+t+'</h2>'+(rows&&rows.length?rows.map(fn).join(''):'<p class="muted">None yet.</p>')+'</div>';}
+m.innerHTML='<div class="eyebrow">tF-OS · Operating System</div><h1>Strategy into disciplined execution</h1>'
++sec('Scorecard',D.scorecard,function(r){return '<p>'+esc(r.metric)+': <b>'+esc(r.current)+'</b> / '+esc(r.target)+' '+esc(r.unit||'')+'</p>';})
++sec('Rocks — this quarter',D.rocks,function(r){return '<p>• '+esc(r.title)+' <span class="pill">'+esc(r.status)+'</span></p>';})
++sec('Issues (CRUCIBLE)',D.issues,function(r){return '<p>• '+esc(r.title)+' <span class="pill">'+esc(r.status)+'</span></p>';})
++sec('Tasks',D.tasks,function(r){return '<p>• '+esc(r.title)+' <span class="pill">'+esc(r.priority)+'</span> <span class="pill">'+esc(r.status)+'</span></p>';})
++sec('Rule of Life',[D.rol],function(r){return '<p class="muted">Sabbath: '+esc(r.sabbath||'—')+'<br>Solitude: '+esc(r.solitude||'—')+'<br>Prayer: '+esc(r.prayer||'—')+'<br>Community: '+esc(r.community||'—')+'</p>';});}
+</script>
+</body>
+</html>
